@@ -1,0 +1,116 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+CONFIG_DIR="${HOME}/.config/opencode"
+CONFIG_FILE="${CONFIG_DIR}/opencode.jsonc"
+SHELL_RC="${HOME}/.zshrc"
+
+printf "Kimi Code API key: "
+IFS= read -rs KIMI_CODE_API_KEY
+printf "\n"
+
+if [[ -z "${KIMI_CODE_API_KEY}" ]]; then
+    echo "API key cannot be empty."
+    exit 1
+fi
+
+mkdir -p "${CONFIG_DIR}"
+
+if [[ -f "${CONFIG_FILE}" ]]; then
+    cp "${CONFIG_FILE}" "${CONFIG_FILE}.backup.$(date +%Y%m%d%H%M%S)"
+fi
+
+cat > "${CONFIG_FILE}" <<'JSON'
+{
+  "$schema": "https://opencode.ai/config.json",
+
+  "model": "kimi-code/k3",
+
+  "provider": {
+    "kimi-code": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Kimi Code",
+
+      "options": {
+        "baseURL": "https://api.kimi.com/coding/v1",
+        "apiKey": "{env:KIMI_CODE_API_KEY}"
+      },
+
+      "models": {
+        "k3": {
+          "name": "Kimi K3",
+
+          "limit": {
+            "context": 1048576,
+            "output": 131072
+          },
+
+          "options": {
+            "reasoningEffort": "max"
+          },
+
+          "variants": {
+            "low": {
+              "reasoningEffort": "low"
+            },
+
+            "high": {
+              "reasoningEffort": "high"
+            },
+
+            "max": {
+              "reasoningEffort": "max"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+JSON
+
+touch "${SHELL_RC}"
+
+if grep -q '^export KIMI_CODE_API_KEY=' "${SHELL_RC}"; then
+    python3 - "${SHELL_RC}" "${KIMI_CODE_API_KEY}" <<'PY'
+import pathlib
+import sys
+
+path = pathlib.Path(sys.argv[1])
+api_key = sys.argv[2]
+
+lines = path.read_text().splitlines()
+replacement = f"export KIMI_CODE_API_KEY={api_key!r}"
+
+updated = []
+replaced = False
+
+for line in lines:
+    if line.startswith("export KIMI_CODE_API_KEY="):
+        if not replaced:
+            updated.append(replacement)
+            replaced = True
+    else:
+        updated.append(line)
+
+path.write_text("\n".join(updated) + "\n")
+PY
+else
+    printf '\nexport KIMI_CODE_API_KEY=%q\n' "${KIMI_CODE_API_KEY}" >> "${SHELL_RC}"
+fi
+
+export KIMI_CODE_API_KEY
+
+echo
+echo "OpenCode configured for Kimi K3."
+echo "Config: ${CONFIG_FILE}"
+echo
+echo "Reload your shell:"
+echo "  source ~/.zshrc"
+echo
+echo "Validate:"
+echo "  opencode models"
+echo
+echo "Start Kimi K3:"
+echo "  opencode --model kimi-code/k3"
