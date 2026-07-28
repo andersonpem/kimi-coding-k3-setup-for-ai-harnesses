@@ -90,45 +90,55 @@ def write_json(path_string: str, value: dict) -> None:
     path.write_text(json.dumps(value, indent=2) + "\n")
 
 
+CONFLICTING_ENV_KEYS = {
+    "ANTHROPIC_BASE_URL",
+    "ANTHROPIC_API_KEY",
+    "ANTHROPIC_AUTH_TOKEN",
+    "ANTHROPIC_MODEL",
+    "ANTHROPIC_SMALL_FAST_MODEL",
+    "ANTHROPIC_DEFAULT_FABLE_MODEL",
+    "ANTHROPIC_DEFAULT_FABLE_MODEL_NAME",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL_NAME",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL_NAME",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME",
+    "CLAUDE_CODE_SUBAGENT_MODEL",
+    "CLAUDE_CODE_AUTO_COMPACT_WINDOW",
+    "CLAUDE_CODE_MAX_CONTEXT_TOKENS",
+}
+
+
+def remove_conflicting_env(config: dict) -> None:
+    config_env = config.get("env")
+
+    if not isinstance(config_env, dict):
+        return
+
+    for key in CONFLICTING_ENV_KEYS:
+        config_env.pop(key, None)
+
+    if not config_env:
+        config.pop("env", None)
+
+
 # Skip the normal Anthropic onboarding flow and enable third-party models.
 claude_json = read_json_object(claude_json_path)
 claude_json["penguinModeOrgEnabled"] = True
 claude_json["hasCompletedOnboarding"] = True
+
+# Claude Code also applies the env block from ~/.claude.json. Stale
+# provider values there (e.g. ANTHROPIC_AUTH_TOKEN) override the shell
+# configuration and trigger a both-auth-methods-set warning.
+remove_conflicting_env(claude_json)
+
 write_json(claude_json_path, claude_json)
 
 
 # Remove stale settings that could override the Kimi shell configuration.
 settings = read_json_object(settings_path)
-settings_env = settings.get("env")
-
-if isinstance(settings_env, dict):
-    conflicting_keys = {
-        "ANTHROPIC_BASE_URL",
-        "ANTHROPIC_API_KEY",
-        "ANTHROPIC_AUTH_TOKEN",
-        "ANTHROPIC_MODEL",
-        "ANTHROPIC_SMALL_FAST_MODEL",
-        "ANTHROPIC_DEFAULT_FABLE_MODEL",
-        "ANTHROPIC_DEFAULT_FABLE_MODEL_NAME",
-        "ANTHROPIC_DEFAULT_OPUS_MODEL",
-        "ANTHROPIC_DEFAULT_OPUS_MODEL_NAME",
-        "ANTHROPIC_DEFAULT_SONNET_MODEL",
-        "ANTHROPIC_DEFAULT_SONNET_MODEL_NAME",
-        "ANTHROPIC_DEFAULT_HAIKU_MODEL",
-        "ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME",
-        "CLAUDE_CODE_SUBAGENT_MODEL",
-        "CLAUDE_CODE_AUTO_COMPACT_WINDOW",
-        "CLAUDE_CODE_MAX_CONTEXT_TOKENS",
-    }
-
-    for key in conflicting_keys:
-        settings_env.pop(key, None)
-
-    if settings_env:
-        settings["env"] = settings_env
-    else:
-        settings.pop("env", None)
-
+remove_conflicting_env(settings)
 write_json(settings_path, settings)
 
 

@@ -72,7 +72,7 @@ Use `/effort` to change K3's reasoning effort.
 ### What the Claude Code script changes
 
 - Updates `~/.claude.json` to enable third-party models and mark onboarding complete.
-- Removes provider-related environment values from `~/.claude/settings.json` when they would override the Kimi configuration. Other settings are preserved.
+- Removes provider-related environment values (such as `ANTHROPIC_AUTH_TOKEN` or `ANTHROPIC_BASE_URL`) from `~/.claude.json` and `~/.claude/settings.json` when they would override the Kimi configuration. Leaving a stale `ANTHROPIC_AUTH_TOKEN` in either file triggers Claude Code's "both auth methods set" warning. Other settings are preserved.
 - Creates `~/.config/kimi-claude/env.zsh`, sets its permissions to `600`, and stores the API endpoint, key, K3 model aliases, and context settings there.
 - Adds a marked block to `~/.zshrc` that loads `env.zsh`.
 - Creates timestamped backups beside every existing file before changing it.
