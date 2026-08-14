@@ -4,7 +4,7 @@ set -euo pipefail
 
 CONFIG_DIR="${HOME}/.config/opencode"
 CONFIG_FILE="${CONFIG_DIR}/opencode.jsonc"
-SHELL_RC="${HOME}/.zshrc"
+SHELL_RCS=("${HOME}/.bashrc" "${HOME}/.zshrc")
 
 printf "Kimi Code API key: "
 IFS= read -rs KIMI_CODE_API_KEY
@@ -70,10 +70,11 @@ cat > "${CONFIG_FILE}" <<'JSON'
 }
 JSON
 
-touch "${SHELL_RC}"
+for rc in "${SHELL_RCS[@]}"; do
+    touch "${rc}"
 
-if grep -q '^export KIMI_CODE_API_KEY=' "${SHELL_RC}"; then
-    python3 - "${SHELL_RC}" "${KIMI_CODE_API_KEY}" <<'PY'
+    if grep -q '^export KIMI_CODE_API_KEY=' "${rc}"; then
+        python3 - "${rc}" "${KIMI_CODE_API_KEY}" <<'PY'
 import pathlib
 import sys
 
@@ -96,9 +97,10 @@ for line in lines:
 
 path.write_text("\n".join(updated) + "\n")
 PY
-else
-    printf '\nexport KIMI_CODE_API_KEY=%q\n' "${KIMI_CODE_API_KEY}" >> "${SHELL_RC}"
-fi
+    else
+        printf '\nexport KIMI_CODE_API_KEY=%q\n' "${KIMI_CODE_API_KEY}" >> "${rc}"
+    fi
+done
 
 export KIMI_CODE_API_KEY
 
@@ -107,7 +109,8 @@ echo "OpenCode configured for Kimi K3."
 echo "Config: ${CONFIG_FILE}"
 echo
 echo "Reload your shell:"
-echo "  source ~/.zshrc"
+echo "  source ~/.bashrc   # bash"
+echo "  source ~/.zshrc    # zsh"
 echo
 echo "Validate:"
 echo "  opencode models"

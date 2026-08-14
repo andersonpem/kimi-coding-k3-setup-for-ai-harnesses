@@ -7,9 +7,9 @@ CLAUDE_JSON="${HOME}/.claude.json"
 CLAUDE_SETTINGS="${CLAUDE_DIR}/settings.json"
 
 KIMI_CONFIG_DIR="${HOME}/.config/kimi-claude"
-KIMI_ENV_FILE="${KIMI_CONFIG_DIR}/env.zsh"
+KIMI_ENV_FILE="${KIMI_CONFIG_DIR}/env.sh"
 
-SHELL_RC="${HOME}/.zshrc"
+SHELL_RCS=("${HOME}/.bashrc" "${HOME}/.zshrc")
 
 BLOCK_START="# >>> Kimi K3 for Claude Code >>>"
 BLOCK_END="# <<< Kimi K3 for Claude Code <<<"
@@ -26,16 +26,21 @@ if [[ -z "${KIMI_CODE_API_KEY}" ]]; then
 fi
 
 mkdir -p "${CLAUDE_DIR}" "${KIMI_CONFIG_DIR}"
-touch "${SHELL_RC}"
 
 for file in \
     "${CLAUDE_JSON}" \
     "${CLAUDE_SETTINGS}" \
-    "${KIMI_ENV_FILE}" \
-    "${SHELL_RC}"
+    "${KIMI_ENV_FILE}"
 do
     if [[ -f "${file}" ]]; then
         cp "${file}" "${file}.backup.${TIMESTAMP}"
+    fi
+done
+
+for rc in "${SHELL_RCS[@]}"; do
+    touch "${rc}"
+    if [[ -f "${rc}" ]]; then
+        cp "${rc}" "${rc}.backup.${TIMESTAMP}"
     fi
 done
 
@@ -43,10 +48,10 @@ python3 - \
     "${CLAUDE_JSON}" \
     "${CLAUDE_SETTINGS}" \
     "${KIMI_ENV_FILE}" \
-    "${SHELL_RC}" \
     "${KIMI_CODE_API_KEY}" \
     "${BLOCK_START}" \
-    "${BLOCK_END}" <<'PY'
+    "${BLOCK_END}" \
+    "${SHELL_RCS[@]}" <<'PY'
 import json
 import os
 import pathlib
@@ -57,11 +62,12 @@ import sys
     claude_json_path,
     settings_path,
     env_path,
-    shell_rc_path,
     api_key,
     block_start,
     block_end,
-) = sys.argv[1:]
+) = sys.argv[1:7]
+
+shell_rc_paths = sys.argv[7:]
 
 
 def read_json_object(path_string: str) -> dict:
@@ -173,39 +179,40 @@ env_file.write_text(
 os.chmod(env_file, 0o600)
 
 
-# Replace the previous managed block in .zshrc.
-shell_rc = pathlib.Path(shell_rc_path)
-content = shell_rc.read_text() if shell_rc.exists() else ""
+# Replace the previous managed block in each shell RC.
+for shell_rc_path in shell_rc_paths:
+    shell_rc = pathlib.Path(shell_rc_path)
+    content = shell_rc.read_text() if shell_rc.exists() else ""
 
-start = content.find(block_start)
+    start = content.find(block_start)
 
-if start != -1:
-    end = content.find(block_end, start)
+    if start != -1:
+        end = content.find(block_end, start)
 
-    if end == -1:
-        raise SystemExit(
-            f"Found {block_start!r} in {shell_rc}, "
-            f"but the closing marker is missing."
-        )
+        if end == -1:
+            raise SystemExit(
+                f"Found {block_start!r} in {shell_rc}, "
+                f"but the closing marker is missing."
+            )
 
-    end += len(block_end)
-    content = content[:start] + content[end:]
+        end += len(block_end)
+        content = content[:start] + content[end:]
 
-content = content.rstrip()
+    content = content.rstrip()
 
-managed_block = "\n".join(
-    [
-        block_start,
-        'source "$HOME/.config/kimi-claude/env.zsh"',
-        block_end,
-    ]
-)
+    managed_block = "\n".join(
+        [
+            block_start,
+            'source "$HOME/.config/kimi-claude/env.sh"',
+            block_end,
+        ]
+    )
 
-if content:
-    content += "\n\n"
+    if content:
+        content += "\n\n"
 
-content += managed_block + "\n"
-shell_rc.write_text(content)
+    content += managed_block + "\n"
+    shell_rc.write_text(content)
 PY
 
 chmod 600 "${CLAUDE_JSON}" "${CLAUDE_SETTINGS}" "${KIMI_ENV_FILE}"
@@ -216,7 +223,8 @@ echo
 echo "Claude Code configured for Kimi K3 with 1M context."
 echo
 echo "Reload your shell:"
-echo "  source ~/.zshrc"
+echo "  source ~/.bashrc   # bash"
+echo "  source ~/.zshrc    # zsh"
 echo
 echo "Start Claude Code:"
 echo "  claude"
