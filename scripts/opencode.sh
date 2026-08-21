@@ -47,7 +47,7 @@ cat > "${CONFIG_FILE}" <<'JSON'
           },
 
           "options": {
-            "reasoningEffort": "max"
+            "reasoningEffort": "low"
           },
 
           "variants": {

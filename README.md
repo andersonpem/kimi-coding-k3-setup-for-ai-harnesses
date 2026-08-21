@@ -91,7 +91,7 @@ opencode models
 opencode --model kimi-code/k3
 ```
 
-The generated OpenCode configuration includes `low`, `high`, and `max` reasoning variants and uses `max` by default.
+The generated OpenCode configuration includes `low`, `high`, and `max` reasoning variants and uses `low` by default.
 
 ### What the OpenCode script changes
 
