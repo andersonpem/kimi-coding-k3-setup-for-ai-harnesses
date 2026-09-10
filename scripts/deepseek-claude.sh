@@ -15,7 +15,7 @@ BLOCK_START="# >>> DeepSeek V4 for Claude Code >>>"
 BLOCK_END="# <<< DeepSeek V4 for Claude Code <<<"
 
 TIMESTAMP="$(date +%Y%m%d%H%M%S)"
-DEEPSEEK_MODEL="${1:-deepseek-v4-pro}"
+DEEPSEEK_MODEL="${1:-deepseek-v4-flash}"
 
 case "${DEEPSEEK_MODEL}" in
     deepseek-v4-flash|deepseek-v4-pro)

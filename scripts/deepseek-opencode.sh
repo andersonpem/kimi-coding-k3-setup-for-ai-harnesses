@@ -4,7 +4,7 @@ set -euo pipefail
 
 CONFIG_DIR="${HOME}/.config/opencode"
 CONFIG_FILE="${CONFIG_DIR}/opencode.jsonc"
-DEEPSEEK_MODEL="${1:-deepseek-v4-pro}"
+DEEPSEEK_MODEL="${1:-deepseek-v4-flash}"
 
 case "${DEEPSEEK_MODEL}" in
     deepseek-v4-flash|deepseek-v4-pro|deepseek-v4-flash-vision-exp) ;;

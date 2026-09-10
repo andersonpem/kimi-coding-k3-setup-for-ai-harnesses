@@ -60,10 +60,10 @@ For DeepSeek, export the key through your operating system or shell environment,
 ```sh
 export DEEPSEEK_API_KEY="your-key"
 
-# Claude Code; defaults to deepseek-v4-pro
+# Claude Code; defaults to deepseek-v4-flash
 ./scripts/deepseek-claude.sh
 
-# OpenCode; installs the complete family and defaults to deepseek-v4-pro
+# OpenCode; installs the complete family and defaults to deepseek-v4-flash
 ./scripts/deepseek-opencode.sh
 ```
 
