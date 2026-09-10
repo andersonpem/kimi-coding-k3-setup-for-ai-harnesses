@@ -1,18 +1,20 @@
-# Kimi K3 setup for AI coding agents
+# Kimi K3 and DeepSeek V4 setup for AI coding agents
 
-Small, auditable setup scripts for using [Kimi K3](https://www.kimi.com/code/docs/en/) with [Claude Code](https://docs.anthropic.com/en/docs/claude-code/getting-started) or [OpenCode](https://opencode.ai/en/docs).
+Small, auditable setup scripts for using [Kimi K3](https://www.kimi.com/code/docs/en/) or [DeepSeek V4](https://api-docs.deepseek.com/) with [Claude Code](https://docs.anthropic.com/en/docs/claude-code/getting-started) or [OpenCode](https://opencode.ai/en/docs).
 
-The scripts configure the Kimi Code API, select the `k3` model, enable its 1M-token context window, and prompt for the API key without echoing it to the terminal.
+The Kimi scripts prompt for the API key without echoing it. The DeepSeek scripts consume `DEEPSEEK_API_KEY` from the environment and never copy its value into generated configuration files.
 
 > [!IMPORTANT]
 > These scripts modify files in your home directory and back up configuration files as described below. Review the script you intend to run before executing it.
 
 ## Supported agents
 
-| Agent       | Setup                 | Uninstall                       | Protocol             | Model          |
-|-------------|-----------------------|---------------------------------|----------------------|----------------|
-| Claude Code | `scripts/claude.sh`   | `scripts/claude-uninstall.sh`   | Anthropic-compatible | `k3[1m]`       |
-| OpenCode    | `scripts/opencode.sh` | `scripts/opencode-uninstall.sh` | OpenAI-compatible    | `kimi-code/k3` |
+| Provider | Agent | Setup | Uninstall | Protocol | Models |
+|----------|-------|-------|-----------|----------|--------|
+| Kimi | Claude Code | `scripts/claude.sh` | `scripts/claude-uninstall.sh` | Anthropic-compatible | `k3[1m]` |
+| Kimi | OpenCode | `scripts/opencode.sh` | `scripts/opencode-uninstall.sh` | OpenAI-compatible | `kimi-code/k3` |
+| DeepSeek | Claude Code | `scripts/deepseek-claude.sh` | `scripts/deepseek-claude-uninstall.sh` | Anthropic-compatible | DeepSeek V4 family |
+| DeepSeek | OpenCode | `scripts/deepseek-opencode.sh` | `scripts/deepseek-opencode-uninstall.sh` | OpenAI-compatible | DeepSeek V4 family |
 
 ## Prerequisites
 
@@ -21,6 +23,7 @@ The scripts configure the Kimi Code API, select the `k3` model, enable its 1M-to
 - The coding agent you want to configure: [Claude Code](https://docs.anthropic.com/en/docs/claude-code/getting-started) or [OpenCode](https://opencode.ai/en/docs)
 - An active Kimi Code membership with access to K3 and the 1M context window
 - A Kimi Code API key from the [Kimi Code Console](https://www.kimi.com/code/console)
+- For DeepSeek, an API key from the [DeepSeek Platform](https://platform.deepseek.com/api_keys) exported as `DEEPSEEK_API_KEY`
 
 Kimi Code keys and Kimi Open Platform keys are not interchangeable. These scripts expect a key for `api.kimi.com`, not a key for `api.moonshot.cn`.
 
@@ -50,6 +53,25 @@ The script asks for your Kimi Code API key. Input is hidden. Once setup finishes
 ```sh
 source ~/.bashrc   # bash
 source ~/.zshrc    # zsh
+```
+
+For DeepSeek, export the key through your operating system or shell environment, then run the matching script:
+
+```sh
+export DEEPSEEK_API_KEY="your-key"
+
+# Claude Code; defaults to deepseek-v4-pro
+./scripts/deepseek-claude.sh
+
+# OpenCode; installs the complete family and defaults to deepseek-v4-pro
+./scripts/deepseek-opencode.sh
+```
+
+Pass a model ID to choose another default:
+
+```sh
+./scripts/deepseek-claude.sh deepseek-v4-flash
+./scripts/deepseek-opencode.sh deepseek-v4-flash-vision-exp
 ```
 
 ## Claude Code
@@ -102,6 +124,25 @@ The generated OpenCode configuration includes `low`, `high`, and `max` reasoning
 > [!WARNING]
 > The OpenCode script replaces the complete `opencode.jsonc` file. If you already use other providers or custom OpenCode settings, merge the generated Kimi provider into your configuration manually or restore the backup afterward.
 
+## DeepSeek V4
+
+The DeepSeek scripts configure these API model IDs:
+
+| Model | Input | Context | Maximum output |
+|-------|-------|---------|----------------|
+| `deepseek-v4-flash` | Text | 1M tokens | 384K tokens |
+| `deepseek-v4-pro` | Text | 1M tokens | 384K tokens |
+| `deepseek-v4-flash-vision-exp` | Text and images | 1M tokens | 384K tokens |
+
+DeepSeek thinking mode is enabled by default. The OpenCode configuration provides `none`, `low`, `high`, and `max` variants. The vision model is experimental and supports JPEG, PNG, GIF, and WebP input.
+
+Claude Code can use one DeepSeek model at a time. Re-run `deepseek-claude.sh` with the desired model ID to switch. The script uses DeepSeek's Anthropic-compatible endpoint, sets the 1M context limits, and loads the key from `DEEPSEEK_API_KEY` whenever the shell starts.
+
+OpenCode receives all three models in its model picker. The setup script uses the requested model as the default and references `{env:DEEPSEEK_API_KEY}` in `opencode.jsonc`.
+
+> [!WARNING]
+> Like the Kimi OpenCode setup, the DeepSeek OpenCode script replaces the complete `opencode.jsonc` file after making a timestamped backup.
+
 ## Backups and removal
 
 Backups use the suffix `.backup.YYYYMMDDHHMMSS` and sit next to the original file. For example:
@@ -121,9 +162,17 @@ less scripts/claude-uninstall.sh
 # Or OpenCode
 less scripts/opencode-uninstall.sh
 ./scripts/opencode-uninstall.sh
+
+# DeepSeek for Claude Code
+less scripts/deepseek-claude-uninstall.sh
+./scripts/deepseek-claude-uninstall.sh
+
+# DeepSeek for OpenCode
+less scripts/deepseek-opencode-uninstall.sh
+./scripts/deepseek-opencode-uninstall.sh
 ```
 
-Each uninstall script removes the shell RC entries and Kimi configuration files added by the corresponding setup script. Timestamped backups are preserved so you can restore previous settings manually if needed.
+Each uninstall script removes the configuration added by the corresponding setup script. Timestamped backups are preserved so you can restore previous settings manually if needed.
 
 Open a new terminal after removal, or run `exec bash` / `exec zsh`.
 
@@ -132,6 +181,7 @@ Open a new terminal after removal, or run `exec bash` / `exec zsh`.
 - Never commit or share your API key.
 - Claude Code's key is stored in `~/.config/kimi-claude/env.sh` with `600` permissions.
 - OpenCode's key is stored directly in `~/.bashrc` and `~/.zshrc`. Make sure those files are private and excluded from dotfile repositories, shell-history captures, and support bundles.
+- The DeepSeek scripts do not store the key. `DEEPSEEK_API_KEY` must be present in the environment that starts Claude Code or OpenCode.
 - The scripts create plaintext backups that may contain credentials already present in the affected files. Protect or remove those backups when they are no longer needed.
 - Revoke and replace the key in the Kimi Code Console if it is exposed.
 
@@ -143,7 +193,13 @@ Install Claude Code or OpenCode first, then open a new terminal. The setup scrip
 
 ### Authentication errors
 
-Confirm that the key came from the Kimi Code Console and belongs to an active membership. A Kimi Open Platform key for `api.moonshot.cn` will not work with these endpoints.
+For Kimi, confirm that the key came from the Kimi Code Console and belongs to an active membership. A Kimi Open Platform key for `api.moonshot.cn` will not work with these endpoints.
+
+For DeepSeek, confirm that `DEEPSEEK_API_KEY` is exported in the same environment that starts the coding agent:
+
+```sh
+test -n "${DEEPSEEK_API_KEY:-}" && echo "DeepSeek key is available"
+```
 
 ### Existing Claude Code settings are invalid
 
