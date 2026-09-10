@@ -136,7 +136,7 @@ The DeepSeek scripts configure these API model IDs:
 
 DeepSeek thinking mode is enabled by default. The OpenCode configuration provides `none`, `low`, `high`, and `max` variants. The vision model is experimental and supports JPEG, PNG, GIF, and WebP input.
 
-Claude Code can use one DeepSeek model at a time. Re-run `deepseek-claude.sh` with the desired model ID to switch. The script uses DeepSeek's Anthropic-compatible endpoint, sets the 1M context limits, and loads the key from `DEEPSEEK_API_KEY` whenever the shell starts.
+Claude Code exposes the family through its model aliases: Opus maps to V4 Pro, Sonnet and Haiku map to V4 Flash, and Fable maps to V4 Flash Vision Experimental. The model argument selects the default. The script uses DeepSeek's Anthropic-compatible endpoint, sets the 1M context limits, and loads the key from `DEEPSEEK_API_KEY` whenever the shell starts.
 
 OpenCode receives all three models in its model picker. The setup script uses the requested model as the default and references `{env:DEEPSEEK_API_KEY}` in `opencode.jsonc`.
 
