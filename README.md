@@ -2,17 +2,17 @@
 
 Small, auditable setup scripts for using [Kimi K3](https://www.kimi.com/code/docs/en/) with [Claude Code](https://docs.anthropic.com/en/docs/claude-code/getting-started) or [OpenCode](https://opencode.ai/en/docs).
 
-The scripts configure the Kimi Code API, select the `k3` model, enable its 1M-token context window, and prompt for the API key without echoing it to the terminal.
+The scripts configure the Kimi Code API, expose the full Kimi Code model lineup (`k3`, `k3-256k`, `kimi-for-coding`, `kimi-for-coding-highspeed`), enable K3's 1M-token context window, and prompt for the API key without echoing it to the terminal.
 
 > [!IMPORTANT]
 > These scripts modify files in your home directory and back up configuration files as described below. Review the script you intend to run before executing it.
 
 ## Supported agents
 
-| Agent       | Setup                 | Uninstall                       | Protocol             | Model          |
-|-------------|-----------------------|---------------------------------|----------------------|----------------|
-| Claude Code | `scripts/claude.sh`   | `scripts/claude-uninstall.sh`   | Anthropic-compatible | `k3[1m]`       |
-| OpenCode    | `scripts/opencode.sh` | `scripts/opencode-uninstall.sh` | OpenAI-compatible    | `kimi-code/k3` |
+| Agent       | Setup                 | Uninstall                       | Protocol             | Models                                                       |
+|-------------|-----------------------|---------------------------------|----------------------|-------------------------------------------------------------|
+| Claude Code | `scripts/claude.sh`   | `scripts/claude-uninstall.sh`   | Anthropic-compatible | Opus/Sonnet `k3[1m]`, Haiku `kimi-for-coding-highspeed`, Fable `kimi-for-coding` |
+| OpenCode    | `scripts/opencode.sh` | `scripts/opencode-uninstall.sh` | OpenAI-compatible    | `kimi-code/k3`, `k3-256k`, `kimi-for-coding`, `kimi-for-coding-highspeed` |
 
 ## Prerequisites
 
@@ -74,7 +74,7 @@ Use `/effort` to change K3's reasoning effort.
 
 - Updates `~/.claude.json` to enable third-party models and mark onboarding complete.
 - Removes provider-related environment values (such as `ANTHROPIC_AUTH_TOKEN` or `ANTHROPIC_BASE_URL`) from `~/.claude.json` and `~/.claude/settings.json` when they would override the Kimi configuration. Leaving a stale `ANTHROPIC_AUTH_TOKEN` in either file triggers Claude Code's "both auth methods set" warning. Other settings are preserved.
-- Creates `~/.config/kimi-claude/env.sh`, sets its permissions to `600`, and stores the API endpoint, key, K3 model aliases, and context settings there.
+- Creates `~/.config/kimi-claude/env.sh`, sets its permissions to `600`, and stores the API endpoint, key, per-tier model aliases, and context settings there. The Opus and Sonnet tiers use `k3[1m]`, Haiku uses `kimi-for-coding-highspeed`, and Fable uses `kimi-for-coding`.
 - Adds a marked block to `~/.bashrc` and `~/.zshrc` that loads `env.sh`.
 - Creates timestamped backups beside every existing file before changing it.
 
@@ -91,11 +91,11 @@ opencode models
 opencode --model kimi-code/k3
 ```
 
-The generated OpenCode configuration includes `low`, `high`, and `max` reasoning variants and uses `low` by default.
+The generated OpenCode configuration lists all four Kimi Code models. The K3 models (`k3`, `k3-256k`) include `low`, `high`, and `max` reasoning variants and use `low` by default; the always-thinking coding models (`kimi-for-coding`, `kimi-for-coding-highspeed`) have no effort selector.
 
 ### What the OpenCode script changes
 
-- Writes `~/.config/opencode/opencode.jsonc` with Kimi Code as the provider and K3 as the default model.
+- Writes `~/.config/opencode/opencode.jsonc` with Kimi Code as the provider and K3 as the default model, alongside `k3-256k`, `kimi-for-coding`, and `kimi-for-coding-highspeed`.
 - Adds or updates `KIMI_CODE_API_KEY` in `~/.bashrc` and `~/.zshrc`.
 - Creates a timestamped backup of an existing `opencode.jsonc` before replacing it.
 

@@ -63,6 +63,51 @@ cat > "${CONFIG_FILE}" <<'JSON'
               "reasoningEffort": "max"
             }
           }
+        },
+
+        "k3-256k": {
+          "name": "Kimi K3-256K",
+
+          "limit": {
+            "context": 262144,
+            "output": 131072
+          },
+
+          "options": {
+            "reasoningEffort": "low"
+          },
+
+          "variants": {
+            "low": {
+              "reasoningEffort": "low"
+            },
+
+            "high": {
+              "reasoningEffort": "high"
+            },
+
+            "max": {
+              "reasoningEffort": "max"
+            }
+          }
+        },
+
+        "kimi-for-coding": {
+          "name": "Kimi K2.7 Code",
+
+          "limit": {
+            "context": 262144,
+            "output": 131072
+          }
+        },
+
+        "kimi-for-coding-highspeed": {
+          "name": "Kimi For Coding HighSpeed",
+
+          "limit": {
+            "context": 262144,
+            "output": 131072
+          }
         }
       }
     }
