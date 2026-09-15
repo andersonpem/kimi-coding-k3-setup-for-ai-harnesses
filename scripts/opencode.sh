@@ -25,7 +25,7 @@ cat > "${CONFIG_FILE}" <<'JSON'
 {
   "$schema": "https://opencode.ai/config.json",
 
-  "model": "kimi-code/k3",
+  "model": "kimi-code/k3-256k",
 
   "provider": {
     "kimi-code": {
@@ -62,6 +62,51 @@ cat > "${CONFIG_FILE}" <<'JSON'
             "max": {
               "reasoningEffort": "max"
             }
+          }
+        },
+
+        "k3-256k": {
+          "name": "Kimi K3-256K",
+
+          "limit": {
+            "context": 262144,
+            "output": 131072
+          },
+
+          "options": {
+            "reasoningEffort": "low"
+          },
+
+          "variants": {
+            "low": {
+              "reasoningEffort": "low"
+            },
+
+            "high": {
+              "reasoningEffort": "high"
+            },
+
+            "max": {
+              "reasoningEffort": "max"
+            }
+          }
+        },
+
+        "kimi-for-coding": {
+          "name": "Kimi K2.7 Code",
+
+          "limit": {
+            "context": 262144,
+            "output": 131072
+          }
+        },
+
+        "kimi-for-coding-highspeed": {
+          "name": "Kimi For Coding HighSpeed",
+
+          "limit": {
+            "context": 262144,
+            "output": 131072
           }
         }
       }
@@ -105,7 +150,7 @@ done
 export KIMI_CODE_API_KEY
 
 echo
-echo "OpenCode configured for Kimi K3."
+echo "OpenCode configured for Kimi Code. Default model: kimi-code/k3-256k."
 echo "Config: ${CONFIG_FILE}"
 echo
 echo "Reload your shell:"
@@ -115,5 +160,5 @@ echo
 echo "Validate:"
 echo "  opencode models"
 echo
-echo "Start Kimi K3:"
-echo "  opencode --model kimi-code/k3"
+echo "Start Kimi Code:"
+echo "  opencode --model kimi-code/k3-256k"

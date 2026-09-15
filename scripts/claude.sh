@@ -163,15 +163,15 @@ env_file.write_text(
             'export ANTHROPIC_BASE_URL="https://api.kimi.com/coding/"',
             f"export ANTHROPIC_API_KEY={quoted_key}",
             "",
-            'export ANTHROPIC_MODEL="k3[1m]"',
-            'export ANTHROPIC_DEFAULT_FABLE_MODEL="$ANTHROPIC_MODEL"',
-            'export ANTHROPIC_DEFAULT_OPUS_MODEL="$ANTHROPIC_MODEL"',
-            'export ANTHROPIC_DEFAULT_SONNET_MODEL="$ANTHROPIC_MODEL"',
-            'export ANTHROPIC_DEFAULT_HAIKU_MODEL="$ANTHROPIC_MODEL"',
+            'export ANTHROPIC_MODEL="k3-256k"',
+            'export ANTHROPIC_DEFAULT_FABLE_MODEL="kimi-for-coding"',
+            'export ANTHROPIC_DEFAULT_OPUS_MODEL="k3[1m]"',
+            'export ANTHROPIC_DEFAULT_SONNET_MODEL="k3[1m]"',
+            'export ANTHROPIC_DEFAULT_HAIKU_MODEL="kimi-for-coding-highspeed"',
             'export CLAUDE_CODE_SUBAGENT_MODEL="$ANTHROPIC_MODEL"',
             "",
-            'export CLAUDE_CODE_AUTO_COMPACT_WINDOW="1048576"',
-            'export CLAUDE_CODE_MAX_CONTEXT_TOKENS="1048576"',
+            'export CLAUDE_CODE_AUTO_COMPACT_WINDOW="262144"',
+            'export CLAUDE_CODE_MAX_CONTEXT_TOKENS="262144"',
             "",
         ]
     )
@@ -221,7 +221,7 @@ chmod 600 "${CLAUDE_JSON}" "${CLAUDE_SETTINGS}" "${KIMI_ENV_FILE}"
 unset KIMI_CODE_API_KEY
 
 echo
-echo "Claude Code configured for Kimi K3 with 1M context."
+echo "Claude Code configured for Kimi Code. Default model: k3-256k (256K context)."
 echo
 echo "Reload your shell:"
 echo "  source ~/.bashrc   # bash"

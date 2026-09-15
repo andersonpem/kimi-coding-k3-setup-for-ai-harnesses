@@ -124,25 +124,6 @@ The generated OpenCode configuration includes `low`, `high`, and `max` reasoning
 > [!WARNING]
 > The OpenCode script replaces the complete `opencode.jsonc` file. If you already use other providers or custom OpenCode settings, merge the generated Kimi provider into your configuration manually or restore the backup afterward.
 
-## DeepSeek V4
-
-The DeepSeek scripts configure these API model IDs:
-
-| Model | Input | Context | Maximum output |
-|-------|-------|---------|----------------|
-| `deepseek-v4-flash` | Text | 1M tokens | 384K tokens |
-| `deepseek-v4-pro` | Text | 1M tokens | 384K tokens |
-| `deepseek-v4-flash-vision-exp` | Text and images | 1M tokens | 384K tokens |
-
-DeepSeek thinking mode is enabled by default. The OpenCode configuration provides `none`, `low`, `high`, and `max` variants. The vision model is experimental and supports JPEG, PNG, GIF, and WebP input.
-
-Claude Code exposes the family through its model aliases: Opus maps to V4 Pro, Sonnet and Haiku map to V4 Flash, and Fable maps to V4 Flash Vision Experimental. The model argument selects the default. The script uses DeepSeek's Anthropic-compatible endpoint, sets the 1M context limits, and loads the key from `DEEPSEEK_API_KEY` whenever the shell starts.
-
-OpenCode receives all three models in its model picker. The setup script uses the requested model as the default and references `{env:DEEPSEEK_API_KEY}` in `opencode.jsonc`.
-
-> [!WARNING]
-> Like the Kimi OpenCode setup, the DeepSeek OpenCode script replaces the complete `opencode.jsonc` file after making a timestamped backup.
-
 ## Backups and removal
 
 Backups use the suffix `.backup.YYYYMMDDHHMMSS` and sit next to the original file. For example:
@@ -172,7 +153,7 @@ less scripts/deepseek-opencode-uninstall.sh
 ./scripts/deepseek-opencode-uninstall.sh
 ```
 
-Each uninstall script removes the configuration added by the corresponding setup script. Timestamped backups are preserved so you can restore previous settings manually if needed.
+Each uninstall script removes the shell RC entries and Kimi configuration files added by the corresponding setup script. Timestamped backups are preserved so you can restore previous settings manually if needed.
 
 Open a new terminal after removal, or run `exec bash` / `exec zsh`.
 
@@ -181,7 +162,6 @@ Open a new terminal after removal, or run `exec bash` / `exec zsh`.
 - Never commit or share your API key.
 - Claude Code's key is stored in `~/.config/kimi-claude/env.sh` with `600` permissions.
 - OpenCode's key is stored directly in `~/.bashrc` and `~/.zshrc`. Make sure those files are private and excluded from dotfile repositories, shell-history captures, and support bundles.
-- The DeepSeek scripts do not store the key. `DEEPSEEK_API_KEY` must be present in the environment that starts Claude Code or OpenCode.
 - The scripts create plaintext backups that may contain credentials already present in the affected files. Protect or remove those backups when they are no longer needed.
 - Revoke and replace the key in the Kimi Code Console if it is exposed.
 
